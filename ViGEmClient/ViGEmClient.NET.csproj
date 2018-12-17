@@ -49,6 +49,14 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="costura32\**" />
+    <Compile Remove="costura64\**" />
+    <EmbeddedResource Remove="costura32\**" />
+    <EmbeddedResource Remove="costura64\**" />
+    <None Remove="costura32\**" />
+    <None Remove="costura64\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -57,12 +65,6 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="costura64\ViGEmClient.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="costura32\ViGEmClient.dll" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FodyWeavers.xml" />
