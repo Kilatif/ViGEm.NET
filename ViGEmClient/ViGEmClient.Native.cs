@@ -45,6 +45,7 @@ namespace Nefarius.ViGEm.Client
         [StructLayout(LayoutKind.Sequential)]
         internal struct DS4_REPORT
         {
+            public byte TimerStatus;
             [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 64)]
             public byte[] Report;
         }

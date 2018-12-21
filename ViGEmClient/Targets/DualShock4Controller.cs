@@ -71,8 +71,12 @@ namespace Nefarius.ViGEm.Client.Targets
 
         public void SendReport(byte[] report, byte timerStatus = 2)
         {
-            //var submit = new ViGEmClient.DS4_REPORT {Report = report};
-            var error = ViGEmClient.vigem_target_ds4_update(Client.NativeHandle, NativeHandle, report);
+            var submit = new ViGEmClient.DS4_REPORT
+            {
+                TimerStatus = timerStatus,
+                Report = report
+            };
+            var error = ViGEmClient.vigem_target_ds4_update(Client.NativeHandle, NativeHandle, submit);
 
             switch (error)
             {
