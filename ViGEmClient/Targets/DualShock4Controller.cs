@@ -1,4 +1,6 @@
-﻿using Nefarius.ViGEm.Client.Exceptions;
+﻿using System;
+using System.Runtime.InteropServices;
+using Nefarius.ViGEm.Client.Exceptions;
 using Nefarius.ViGEm.Client.Targets.DualShock4;
 
 namespace Nefarius.ViGEm.Client.Targets
@@ -44,7 +46,7 @@ namespace Nefarius.ViGEm.Client.Targets
         public void SendReport(DualShock4Report report)
         {
             // Convert managed to unmanaged structure
-            var submit = new ViGEmClient.DS4_REPORT
+            /*var submit = new ViGEmClient.DS4_REPORT
             {
                 wButtons = report.Buttons,
                 bSpecial = report.SpecialButtons,
@@ -54,9 +56,23 @@ namespace Nefarius.ViGEm.Client.Targets
                 bThumbRY = report.RightThumbY,
                 bTriggerL = report.LeftTrigger,
                 bTriggerR = report.RightTrigger
-            };
+            };*/
 
-            var error = ViGEmClient.vigem_target_ds4_update(Client.NativeHandle, NativeHandle, submit);
+            /*var error = ViGEmClient.vigem_target_ds4_update(Client.NativeHandle, NativeHandle, submit);
+
+            switch (error)
+            {
+                case ViGEmClient.VIGEM_ERROR.VIGEM_ERROR_BUS_NOT_FOUND:
+                    throw new VigemBusNotFoundException();
+                case ViGEmClient.VIGEM_ERROR.VIGEM_ERROR_INVALID_TARGET:
+                    throw new VigemInvalidTargetException();
+            }*/
+        }
+
+        public void SendReport(byte[] report, byte timerStatus = 2)
+        {
+            //var submit = new ViGEmClient.DS4_REPORT {Report = report};
+            var error = ViGEmClient.vigem_target_ds4_update(Client.NativeHandle, NativeHandle, report);
 
             switch (error)
             {
@@ -74,9 +90,12 @@ namespace Nefarius.ViGEm.Client.Targets
             //
             // Callback to event
             // 
-            _notificationCallback = (client, target, motor, smallMotor, color) => FeedbackReceived?.Invoke(this,
-                new DualShock4FeedbackReceivedEventArgs(motor, smallMotor,
-                    new LightbarColor(color.Red, color.Green, color.Blue)));
+            _notificationCallback = (client, target, report) =>
+            {
+                var array = new byte[64];
+                Marshal.Copy(report, array, 0, 64);
+                FeedbackReceived?.Invoke(this, array);
+            };
 
             var error = ViGEmClient.vigem_target_ds4_register_notification(Client.NativeHandle, NativeHandle,
                 _notificationCallback);
@@ -102,5 +121,5 @@ namespace Nefarius.ViGEm.Client.Targets
         public event DualShock4FeedbackReceivedEventHandler FeedbackReceived;
     }
 
-    public delegate void DualShock4FeedbackReceivedEventHandler(object sender, DualShock4FeedbackReceivedEventArgs e);
+    public delegate void DualShock4FeedbackReceivedEventHandler(object sender, byte[] report);
 }

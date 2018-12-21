@@ -45,14 +45,8 @@ namespace Nefarius.ViGEm.Client
         [StructLayout(LayoutKind.Sequential)]
         internal struct DS4_REPORT
         {
-            public byte bThumbLX;
-            public byte bThumbLY;
-            public byte bThumbRX;
-            public byte bThumbRY;
-            public ushort wButtons;
-            public byte bSpecial;
-            public byte bTriggerL;
-            public byte bTriggerR;
+            [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 64)]
+            public byte[] Report;
         }
 
         internal enum VIGEM_TARGET_TYPE : UInt32
@@ -88,9 +82,7 @@ namespace Nefarius.ViGEm.Client
         internal delegate void PVIGEM_DS4_NOTIFICATION(
             PVIGEM_CLIENT Client,
             PVIGEM_TARGET Target,
-            byte LargeMotor,
-            byte SmallMotor,
-            DS4_LIGHTBAR_COLOR LightbarColor);
+            IntPtr Report);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         static extern PVIGEM_CLIENT vigem_alloc();
@@ -151,6 +143,9 @@ namespace Nefarius.ViGEm.Client
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         internal static extern VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, DS4_REPORT report);
+
+        [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, byte[] report);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         static extern uint vigem_target_get_index(PVIGEM_TARGET target);
