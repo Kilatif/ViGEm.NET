@@ -147,6 +147,11 @@ namespace ViGEmClient.Net.Demo
         }
         private static byte[] GetBytes(object value, bool isLittleEndian)
         {
+            if (value == null)
+            {
+                return new byte[1];
+            }
+
             return (value is Array valueArray)
                 ? valueArray.Cast<object>().SelectMany(val => GetNumericBytes(val, isLittleEndian)).ToArray()
                 : GetNumericBytes(value, isLittleEndian);

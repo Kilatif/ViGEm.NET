@@ -112,9 +112,9 @@ namespace ViGEmClient.Net.Demo
 
         // for x21 ReportID only
         [PacketInfo(13)]
-        public byte ACK;
+        public byte ACK { get; set; }
         [PacketInfo(14)]
-        public byte SubCmdId;
+        public byte SubCmdId { get; set; }
         [PacketInfo(15, MaxSize = 35)]
         public byte[] SubCmdData { get; set; }
         //

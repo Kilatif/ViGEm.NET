@@ -7,118 +7,98 @@ using System.Threading.Tasks;
 using Microsoft.Win32;
 using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.DualShock4;
+using ViGEmClient.Net.Demo.Responsers;
 using static Nefarius.ViGEm.Client.Targets.DualShock4.DualShock4Buttons;
 
 namespace ViGEmClient.Net.Demo
 {
-    class RootController
+    enum TimerStatus : byte
     {
+        Disable = 0,
+        EnableAndSavePacket = 1,
+        Ignore = 2
+    }
+
+    class RootController : IDisposable
+    {
+        private const string MacRegistryPath = "SYSTEM\\ControlSet001\\Services\\ViGEmBus\\Parameters\\Targets\\NintendoSwitchPro\\";
+        private const string MacValueName = "TargetMacAddress";
+
+        private DualShock4Controller _deviceTarget;
+        private CommandResponser _responser;
+
         public void Run()
         {
-            var mac = new byte[0];
-            using (var key = Registry.LocalMachine.OpenSubKey("SYSTEM\\ControlSet001\\Services\\ViGEmBus\\Parameters\\Targets\\NintendoSwitchPro\\0001"))
-            {
-                mac = (byte[])key.GetValue("TargetMacAddress");
-            }
+            var macAddress = InitializeAndConnectDevice();
+            var control = PacketConstructor.BuildObject<ReportPacket>(Reports.Default_0x21);
 
-            //var x = Registry.LocalMachine.GetValue("SYSTEM\\ControlSet001\\Services\\ViGEmBus\\Parameters\\Targets\\NintendoSwitchPro\\0001\\Test", null, RegistryValueOptions.None);
-            //Registry.LocalMachine.
-            //Registry.GetValue("COMPUTER\\HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Services\\ViGEmBus\\Parameters\\Targets\\NintendoSwitchPro\\0001")
-            //var vClient = new Nefarius.ViGEm.Client.ViGEmClient();
-            //var dsTarget = new DualShock4Controller(vClient);
-
-            //dsTarget.Connect();
+            _responser = new CommandResponser {DeviceMac = macAddress};
+            _deviceTarget.FeedbackReceived += DeviceFeedbackReciver;
 
             Console.ReadLine();
 
-            //dsTarget.Disconnect();
+            control.ReportId = 0x30;
+            _deviceTarget.SendReport(PacketConstructor.BuildPacket(control), (byte)TimerStatus.EnableAndSavePacket);
+
+            Console.ReadLine();
+
+            control.LeftButtons = LeftButtons.Right;
+            _deviceTarget.SendReport(PacketConstructor.BuildPacket(control));
+
+            Console.ReadLine();
         }
 
-        /*public void Run()
+        private void DeviceFeedbackReciver(object sender, byte[] packet)
         {
-            var isTimerEnabled = false;
-            var prevResponse = Reports.Packet_0x8104;
-            var vClient = new Nefarius.ViGEm.Client.ViGEmClient();
-            var dsTarget = new DualShock4Controller(vClient);
-
-            dsTarget.Connect();
-
-            dsTarget.FeedbackReceived += (sender, report) =>
-            {
-                Console.WriteLine("Got request...");
-                WriteData(report, 16);
-                Console.WriteLine();
-
-                var timerEnable = false;
-                byte timerStatus = 2;
-                var response = Reports.GetResponse(report, ref timerEnable);
-
-                if (!isTimerEnabled && timerEnable)
-                {
-                    timerStatus = 1;
-                    isTimerEnabled = true;
-                }
-                
-                if (response != null)
-                {
-                    dsTarget.SendReport(response, timerStatus);
-
-                    Console.WriteLine("Send response...");
-                    WriteData(response, 16);
-                    Console.WriteLine("-------------------");
-                    Console.WriteLine();
-
-                    if (isTimerEnabled)
-                    {
-                        dsTarget.SendReport(prevResponse);
-                    }
-                }
-            };
-
-            //dsTarget.SendReport(prevResponse);
-
-            Console.ReadLine();
-
-            //prevResponse
-            prevResponse[5] = 0x04;
-            dsTarget.SendReport(prevResponse, 1);
-
-            Console.ReadLine();
-
-            prevResponse[5] = 0x00;
-            dsTarget.SendReport(prevResponse);
-
-            Console.ReadLine();
-
-            //prevResponse[5] = 0x00;
-            dsTarget.SendReport(prevResponse, 0);
-
-            Console.ReadLine();
-
-            dsTarget.Disconnect();
-        }
-
-        private void WriteData(byte[] data, int splitCount = -1)
-        {
-            var splitData = Split(data, splitCount < 0 ? data.Length : splitCount);
-            Console.WriteLine(string.Join("\n", splitData.Select(arr => $"{string.Join(" ", arr.Select(v => Convert.ToString(v, 16).ToUpper().PadLeft(2, '0')).ToArray())}").ToArray()));
+            Console.WriteLine("Got request...");
+            PacketOutput.WriteData(packet, 16);
             Console.WriteLine();
-        }
 
-        private T[][] Split<T>(T[] data, int arrayCount)
-        {
-            var result = new T[(int)Math.Ceiling((decimal)data.Length / arrayCount)][];
-            for (var i = 0; i < result.Length; i++)
+            var prevTimerEnable = _responser.IsTimerEnabled;
+            var response = _responser.BuildResponsePacket(packet);
+            var curTimerEnable = _responser.IsTimerEnabled;
+
+            byte timerStatus = (byte)TimerStatus.Ignore;
+            if (!prevTimerEnable && curTimerEnable)
             {
-                result[i] = new T[arrayCount];
-                for (var j = 0; j < arrayCount; j++)
-                {
-                    var index = i * arrayCount + j;
-                    result[i][j] = index >= data.Length ? default(T) : data[index];
-                }
+                timerStatus = (byte)TimerStatus.EnableAndSavePacket;
             }
 
-            return result;
-        }*/
+            if (response != null)
+            {
+                _deviceTarget.SendReport(response, timerStatus);
+
+                Console.WriteLine("Send response...");
+                PacketOutput.WriteData(response, 16);
+                Console.WriteLine("-------------------");
+                Console.WriteLine();
+            }
+        }
+
+        private byte[] InitializeAndConnectDevice()
+        {
+            var vClient = new Nefarius.ViGEm.Client.ViGEmClient();
+            _deviceTarget = new DualShock4Controller(vClient);
+            _deviceTarget.Connect();
+
+            return ReadDeviceMac(1);
+        }
+
+        private byte[] ReadDeviceMac(uint serialNumber)
+        {
+            byte[] mac;
+            using (var key = Registry.LocalMachine.OpenSubKey(MacRegistryPath + serialNumber.ToString().PadLeft(4, '0')))
+            {
+                mac = (byte[])key?.GetValue("TargetMacAddress") ?? new byte[0];
+            }
+
+            return mac;
+        }
+
+        public void Dispose()
+        {
+            _deviceTarget?.Disconnect();
+            _deviceTarget?.Dispose();
+        }
     }
 }

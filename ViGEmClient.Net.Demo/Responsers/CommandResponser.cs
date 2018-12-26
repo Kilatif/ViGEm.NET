@@ -1,37 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
+using ViGEmClient.Net.Demo.Packets;
 
-namespace ViGEmClient.Net.Demo
+namespace ViGEmClient.Net.Demo.Responsers
 {
-    class CommandResponser : IPacketResponser
+    class CommandResponser
     {
-        private const byte SrcPckTypeVal = 0x01;
-        private const byte RespPckTypeVal = 0x21;
-        private const byte DataPckTypeVal = 0x30;
+        public bool IsTimerEnabled { get; private set; }
+        public byte[] DeviceMac { private get; set; } = new byte[1];
 
-        private CommandRequestPacket _requestPacket;
-
-        public byte[] SourcePacket { set => SetSourcePacket(value); }
-        public byte[] ResponsePacket => BuildResponsePacket();
-
-        public void SetSourcePacket(byte[] packet)
+        public byte[] BuildResponsePacket(byte[] requestPacket)
         {
-            _requestPacket = PacketConstructor.BuildObject<CommandRequestPacket>(packet);
+            var generalPacket = PacketConstructor.BuildObject<GeneralPacket>(requestPacket);
+            switch (generalPacket.CommandId)
+            {
+                case 0x80: return BuildUsbResponsePacket(generalPacket.SubCommandId);
+                case 0x01: return BuildReportPacket(requestPacket);
+                default: return null;
+            }
         }
 
-        public byte[] BuildResponsePacket()
+        private byte[] BuildUsbResponsePacket(byte subCommandId)
+        {
+            var responsePacket = new UsbResponsePacket
+            {
+                CommandId = 0x81,
+                SubCommandId = subCommandId
+            };
+
+            ReportPacket response;
+            switch (subCommandId)
+            {
+                case 0x01:
+                    responsePacket.GamePadType = UsbControllerType.ProController;
+                    responsePacket.GamePadMac = DeviceMac.Reverse().ToArray();
+                    break;
+
+                case 0x04:
+                    IsTimerEnabled = true;
+
+                    response = PacketConstructor.BuildObject<ReportPacket>(Reports.Default_0x21);
+                    response.ReportId = 0x30;
+                    return PacketConstructor.BuildPacket(response);
+
+                case 0x05:
+                    IsTimerEnabled = false;
+                    response = PacketConstructor.BuildObject<ReportPacket>(Reports.Default_0x21);
+                    response.ReportId = 0x30;
+                    
+                    return PacketConstructor.BuildPacket(response);
+            }
+
+            return PacketConstructor.BuildPacket(responsePacket);
+        }
+
+        private byte[] BuildReportPacket(byte[] packet)
         {
             var responsePacket = PacketConstructor.BuildObject<ReportPacket>(Reports.Default_0x21);
-            responsePacket.SubCmdId = _requestPacket.SubCommandId;
+            var requestPacket = PacketConstructor.BuildObject<CommandRequestPacket>(packet);
+
+            responsePacket.SubCmdId = requestPacket.SubCommandId;
             responsePacket.ACK = 0x80;
 
-            switch (_requestPacket.SubCommandId)
+            switch (requestPacket.SubCommandId)
             {
-                case 0x10 :
-                    var subCmdData = PacketConstructor.BuildObject<SubCmdDataFlashRead>(_requestPacket.SubCommandData);
+                case 0x10:
+                    var subCmdData = PacketConstructor.BuildObject<SubCmdDataFlashRead>(requestPacket.SubCommandData);
                     if (Reports.FlashDataMap.TryGetValue(subCmdData.Address, out byte[] data))
                     {
                         responsePacket.ACK = 0x90;
@@ -42,9 +75,6 @@ namespace ViGEmClient.Net.Demo
                     {
                         return null;
                     }
-                    break;
-                case 0x40:
-
                     break;
             }
 

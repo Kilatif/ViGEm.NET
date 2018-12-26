@@ -15,7 +15,7 @@ namespace ViGEmClient.Net.Demo
         public byte PacketNumber { get; set; }
         [PacketInfo(10)]
         public byte SubCommandId { get; set; }
-        [PacketInfo(11)]
+        [PacketInfo(11, MaxSize = 35)]
         public byte[] SubCommandData { get; set; }
     }
 
@@ -23,7 +23,7 @@ namespace ViGEmClient.Net.Demo
     class SubCmdDataFlashRead
     {
         [PacketInfo(0)]
-        public ulong Address { get; set; }
+        public uint Address { get; set; }
         [PacketInfo(4)]
         public byte Length { get; set; }
         [PacketInfo(5, MaxSize = 30)]

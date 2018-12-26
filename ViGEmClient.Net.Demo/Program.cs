@@ -10,11 +10,10 @@ namespace ViGEmClient.Net.Demo
     {
         static void Main(string[] args)
         {
-            //var val = BitConverter.ToUInt16(new byte[] {0x34, 0xFE}, 0);
-
-
             var root = new RootController();
             root.Run();
+
+            root.Dispose();
         }
     }
 }
