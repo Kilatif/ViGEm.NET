@@ -43,10 +43,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Packets\CommandRequestPacket.cs" />
+    <Compile Include="IPacketResponser.cs" />
+    <Compile Include="PacketConstructor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Packets\ReportPacket.cs" />
     <Compile Include="Reports.cs" />
     <Compile Include="RootController.cs" />
+    <Compile Include="Responsers\CommandResponser.cs" />
+    <Compile Include="Responsers\UsbResponser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

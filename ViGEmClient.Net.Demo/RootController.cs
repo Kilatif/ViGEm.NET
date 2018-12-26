@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.DualShock4;
 using static Nefarius.ViGEm.Client.Targets.DualShock4.DualShock4Buttons;
@@ -12,6 +14,27 @@ namespace ViGEmClient.Net.Demo
     class RootController
     {
         public void Run()
+        {
+            var mac = new byte[0];
+            using (var key = Registry.LocalMachine.OpenSubKey("SYSTEM\\ControlSet001\\Services\\ViGEmBus\\Parameters\\Targets\\NintendoSwitchPro\\0001"))
+            {
+                mac = (byte[])key.GetValue("TargetMacAddress");
+            }
+
+            //var x = Registry.LocalMachine.GetValue("SYSTEM\\ControlSet001\\Services\\ViGEmBus\\Parameters\\Targets\\NintendoSwitchPro\\0001\\Test", null, RegistryValueOptions.None);
+            //Registry.LocalMachine.
+            //Registry.GetValue("COMPUTER\\HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Services\\ViGEmBus\\Parameters\\Targets\\NintendoSwitchPro\\0001")
+            //var vClient = new Nefarius.ViGEm.Client.ViGEmClient();
+            //var dsTarget = new DualShock4Controller(vClient);
+
+            //dsTarget.Connect();
+
+            Console.ReadLine();
+
+            //dsTarget.Disconnect();
+        }
+
+        /*public void Run()
         {
             var isTimerEnabled = false;
             var prevResponse = Reports.Packet_0x8104;
@@ -96,6 +119,6 @@ namespace ViGEmClient.Net.Demo
             }
 
             return result;
-        }
+        }*/
     }
 }
