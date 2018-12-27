@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Win32;
 using Nefarius.ViGEm.Client.Targets;
-using Nefarius.ViGEm.Client.Targets.DualShock4;
 using ViGEmClient.Net.Demo.Responsers;
-using static Nefarius.ViGEm.Client.Targets.DualShock4.DualShock4Buttons;
 
 namespace ViGEmClient.Net.Demo
 {
@@ -24,7 +17,7 @@ namespace ViGEmClient.Net.Demo
         private const string MacRegistryPath = "SYSTEM\\ControlSet001\\Services\\ViGEmBus\\Parameters\\Targets\\NintendoSwitchPro\\";
         private const string MacValueName = "TargetMacAddress";
 
-        private DualShock4Controller _deviceTarget;
+        private NintendoSwitchController _deviceTarget;
         private CommandResponser _responser;
 
         public void Run()
@@ -78,7 +71,7 @@ namespace ViGEmClient.Net.Demo
         private byte[] InitializeAndConnectDevice()
         {
             var vClient = new Nefarius.ViGEm.Client.ViGEmClient();
-            _deviceTarget = new DualShock4Controller(vClient);
+            _deviceTarget = new NintendoSwitchController(vClient);
             _deviceTarget.Connect();
 
             return ReadDeviceMac(1);

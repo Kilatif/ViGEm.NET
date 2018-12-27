@@ -80,5 +80,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+    <Folder Include="Targets\NintendoSwitch\" />
   </ItemGroup>
 </Project>

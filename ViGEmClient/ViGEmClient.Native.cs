@@ -43,7 +43,7 @@ namespace Nefarius.ViGEm.Client
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct DS4_REPORT
+        internal struct NSWITCH_REPORT
         {
             public byte TimerStatus;
             [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 64)]
@@ -61,16 +61,9 @@ namespace Nefarius.ViGEm.Client
             // 
             XboxOneWired, // TODO: not implemented
             //
-            // Sony DualShock 4 (wired)
+            // Nintendo Switch (wired)
             // 
-            DualShock4Wired
-        }
-
-        internal struct DS4_LIGHTBAR_COLOR
-        {
-            public byte Red;
-            public byte Green;
-            public byte Blue;
+            NintendoSwitchWired
         }
 
         internal delegate void PVIGEM_X360_NOTIFICATION(
@@ -80,7 +73,7 @@ namespace Nefarius.ViGEm.Client
             byte SmallMotor,
             byte LedNumber);
 
-        internal delegate void PVIGEM_DS4_NOTIFICATION(
+        internal delegate void PVIGEM_NSWITCH_NOTIFICATION(
             PVIGEM_CLIENT Client,
             PVIGEM_TARGET Target,
             IntPtr Report);
@@ -101,7 +94,7 @@ namespace Nefarius.ViGEm.Client
         internal static extern PVIGEM_TARGET vigem_target_x360_alloc();
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern PVIGEM_TARGET vigem_target_ds4_alloc();
+        internal static extern PVIGEM_TARGET vigem_target_nswitch_alloc();
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void vigem_target_free(PVIGEM_TARGET target);
@@ -119,13 +112,13 @@ namespace Nefarius.ViGEm.Client
         internal static extern VIGEM_ERROR vigem_target_x360_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_X360_NOTIFICATION notification);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern VIGEM_ERROR vigem_target_ds4_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_DS4_NOTIFICATION notification);
+        internal static extern VIGEM_ERROR vigem_target_nswitch_register_notification(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, PVIGEM_NSWITCH_NOTIFICATION notification);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void vigem_target_x360_unregister_notification(PVIGEM_TARGET target);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern void vigem_target_ds4_unregister_notification(PVIGEM_TARGET target);
+        internal static extern void vigem_target_nswitch_unregister_notification(PVIGEM_TARGET target);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         internal static extern void vigem_target_set_vid(PVIGEM_TARGET target, ushort vid);
@@ -143,10 +136,10 @@ namespace Nefarius.ViGEm.Client
         internal static extern VIGEM_ERROR vigem_target_x360_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, XUSB_REPORT report);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, DS4_REPORT report);
+        internal static extern VIGEM_ERROR vigem_target_nswitch_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, NSWITCH_REPORT report);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern VIGEM_ERROR vigem_target_ds4_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, byte[] report);
+        internal static extern VIGEM_ERROR vigem_target_nswitch_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, byte[] report);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         static extern uint vigem_target_get_index(PVIGEM_TARGET target);
