@@ -49,13 +49,13 @@
     <Compile Include="JoyConDevice.cs" />
     <Compile Include="JoyConsProDevice.cs" />
     <Compile Include="PacketOutput.cs" />
-    <Compile Include="Packets\CommandRequestPacket.cs" />
+    <Compile Include="Packets\OutputReportPacket.cs" />
     <Compile Include="PacketConstructor.cs" />
     <Compile Include="Packets\UsbRequestPacket.cs" />
     <Compile Include="Packets\UsbResponsePacket.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Packets\ReportPacket.cs" />
+    <Compile Include="Packets\InputReportPacket.cs" />
     <Compile Include="Reports.cs" />
     <Compile Include="RootController.cs" />
     <Compile Include="Responsers\CommandResponser.cs" />

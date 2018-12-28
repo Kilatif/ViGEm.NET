@@ -79,7 +79,7 @@ namespace ViGEmClient.Net.Demo
     #endregion
 
     [PacketSize(64)]
-    class ReportPacket
+    class InputReportPacket
     {
         [PacketInfo(0)]
         public byte ReportId { get; set; }

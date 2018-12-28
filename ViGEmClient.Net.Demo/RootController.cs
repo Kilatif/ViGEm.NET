@@ -22,6 +22,31 @@ namespace ViGEmClient.Net.Demo
 
         public void Run()
         {
+            var joyConsProDev = new JoyConsProDevice();
+
+            joyConsProDev.AddSyncResponseContidion(report => report[0] == 0x21);
+            joyConsProDev.InputRecieved += JoyConsProDev_InputRecieved;
+
+            var error = joyConsProDev.Initialize();
+
+            Console.ReadKey();
+
+            joyConsProDev.Dispose();
+        }
+
+        private byte[] _curMessage = new byte[64];
+        private void JoyConsProDev_InputRecieved(byte[] inputPacket)
+        {
+            lock (_curMessage)
+            {
+                Array.Copy(inputPacket, _curMessage, _curMessage.Length);
+                Console.SetCursorPosition(0, 0);
+                PacketOutput.WriteData(_curMessage, 16);
+            }
+        }
+
+        /*public void Run()
+        {
             var macAddress = InitializeAndConnectDevice();
             var control = PacketConstructor.BuildObject<ReportPacket>(Reports.Default_0x21);
 
@@ -86,7 +111,7 @@ namespace ViGEmClient.Net.Demo
             }
 
             return mac;
-        }
+        }*/
 
         public void Dispose()
         {

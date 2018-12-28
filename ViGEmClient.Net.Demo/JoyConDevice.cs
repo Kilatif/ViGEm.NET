@@ -16,7 +16,7 @@ namespace ViGEmClient.Net.Demo
         private HidDeviceInputReceiver _inputReceiver;
         private byte[] _reportBuffer;
 
-        public event Action<byte[]> InputReportRecived; 
+        public event Action<byte[]> InputReportRecived;
 
         public bool InitializeDevice(int productId)
         {
@@ -40,6 +40,7 @@ namespace ViGEmClient.Net.Demo
             _reportBuffer = new byte[_hidDevice.GetMaxInputReportLength()];
             _inputReceiver = _hidDevice.GetReportDescriptor().CreateHidDeviceInputReceiver();
             _inputReceiver.Received += OnReportReceived;
+            _inputReceiver.Start(_hidStream);
 
             return true;
         }
@@ -51,12 +52,9 @@ namespace ViGEmClient.Net.Demo
 
         private void OnReportReceived(object sender, EventArgs args)
         {
-            Array.Clear(_reportBuffer, 0, _reportBuffer.Length);
-
-            var offset = 0;
-            while (_inputReceiver.TryRead(_reportBuffer, offset, out var report))
+            while (_inputReceiver.TryRead(_reportBuffer, 0, out _))
             {
-                offset += report.Length;
+             
             }
 
             InputReportRecived?.Invoke(_reportBuffer);
