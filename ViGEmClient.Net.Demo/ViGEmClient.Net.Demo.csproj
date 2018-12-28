@@ -46,6 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JoyConDevice.cs" />
+    <Compile Include="JoyConsProDevice.cs" />
     <Compile Include="PacketOutput.cs" />
     <Compile Include="Packets\CommandRequestPacket.cs" />
     <Compile Include="PacketConstructor.cs" />
