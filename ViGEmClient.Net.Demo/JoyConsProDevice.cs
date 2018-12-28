@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HidSharp;
 using HidSharp.Reports.Input;
+using Console = System.Console;
 
 namespace ViGEmClient.Net.Demo
 {
@@ -40,7 +41,7 @@ namespace ViGEmClient.Net.Demo
         private byte[] _rightJoyConReport;
 
         private readonly List<SyncResponse> _syncResponses;
-        private JoyConType _mainJoyCon = JoyConType.Left;
+        public JoyConType MainJoyCon { get; set; } = JoyConType.Left;
 
         public event Action<byte[]> InputRecieved;
 
@@ -97,6 +98,9 @@ namespace ViGEmClient.Net.Demo
 
         private void JoyConInputReceived(byte[] report, JoyConType joyConType)
         {
+            var repCopy = new byte[report.Length];
+            Array.Copy(report, repCopy, repCopy.Length);
+            
             var wasSyncResponse = false;
             foreach (var syncResponse in _syncResponses)
             {
@@ -105,11 +109,11 @@ namespace ViGEmClient.Net.Demo
                     wasSyncResponse = true;
                     if (joyConType == JoyConType.Left)
                     {
-                        syncResponse.LeftReport = report;
+                        syncResponse.LeftReport = repCopy;
                     }
                     else if (joyConType == JoyConType.Right)
                     {
-                        syncResponse.RightReport = report;
+                        syncResponse.RightReport = repCopy;
                     }
 
                     if (syncResponse.LeftReport != null && syncResponse.RightReport != null)
@@ -126,11 +130,11 @@ namespace ViGEmClient.Net.Demo
             {
                 if (joyConType == JoyConType.Left)
                 {
-                    _leftJoyConReport = report;
+                    _leftJoyConReport = repCopy;
                 }
                 else if (joyConType == JoyConType.Right)
                 {
-                    _rightJoyConReport = report;
+                    _rightJoyConReport = repCopy;
                 }
 
                 if (_leftJoyConReport != null && _rightJoyConReport != null)
@@ -145,8 +149,8 @@ namespace ViGEmClient.Net.Demo
             var cmd = leftReport[0];
             switch (cmd)
             {
-                case 0x30: return Reports.BuildUnionReport_0x30(leftReport, rightReport, _mainJoyCon);
-                case 0x21: return Reports.BuildUnionReport_0x21(leftReport, rightReport, _mainJoyCon);
+                case 0x30: return Reports.BuildUnionReport_0x30(leftReport, rightReport, MainJoyCon);
+                case 0x21: return Reports.BuildUnionReport_0x21(leftReport, rightReport, MainJoyCon);
                 default: return null;
             }
         }

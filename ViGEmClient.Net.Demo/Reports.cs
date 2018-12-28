@@ -44,7 +44,7 @@ namespace ViGEmClient.Net.Demo
             [0xE0600000] = new FlashDataMapDto { DefaultValue = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } },
             [0x20600000] = new FlashDataMapDto { IsUseMain = true },
             [0x80600000] = new FlashDataMapDto { DefaultValue = new byte[] { 0x50, 0xFD, 0x00, 0x00, 0xC6, 0x0F } },
-            [0x3D600000] = new FlashDataMapDto()
+            [0x3D600000] = new FlashDataMapDto (),
         };
 
         public static byte[] BuildUnionReport_0x30(byte[] leftReport, byte[] rightReport, JoyConType mainJoyCon)
@@ -116,7 +116,7 @@ namespace ViGEmClient.Net.Demo
                         var subData = new byte[leftReportObj.SubCmdData.Length];
                         for (var i = 0; i < leftReportObj.SubCmdData.Length; i++)
                         {
-                            subData[i] = (byte)(leftReportObj.SubCmdData[i] | rightReportObj.SubCmdData[i]);
+                            subData[i] = (byte)(leftReportObj.SubCmdData[i] & rightReportObj.SubCmdData[i]);
                         }
 
                         inputReportObj.SubCmdData = subData;

@@ -22,12 +22,29 @@ namespace ViGEmClient.Net.Demo
 
         public void Run()
         {
-            var joyConsProDev = new JoyConsProDevice();
+            var joyConsProDev = new JoyConsProDevice {MainJoyCon = JoyConType.Right};
 
             joyConsProDev.AddSyncResponseContidion(report => report[0] == 0x21);
             joyConsProDev.InputRecieved += JoyConsProDev_InputRecieved;
 
             var error = joyConsProDev.Initialize();
+
+            Console.ReadKey();
+
+            var flashRead = PacketConstructor.BuildPacket(new SubCmdDataFlashRead
+            {
+                Address = 0x3D600000,
+                Length = 18
+            });
+
+            var requestPacket = PacketConstructor.BuildPacket(new OutputReportPacket
+            {
+                CommandId = 0x01,
+                SubCommandId = 0x10,
+                SubCommandData = flashRead
+            });
+
+            joyConsProDev.SendOutputReport(requestPacket);
 
             Console.ReadKey();
 
@@ -37,11 +54,14 @@ namespace ViGEmClient.Net.Demo
         private byte[] _curMessage = new byte[64];
         private void JoyConsProDev_InputRecieved(byte[] inputPacket)
         {
-            lock (_curMessage)
+            if (inputPacket[0] == 0x21)
             {
-                Array.Copy(inputPacket, _curMessage, _curMessage.Length);
-                Console.SetCursorPosition(0, 0);
-                PacketOutput.WriteData(_curMessage, 16);
+                lock (_curMessage)
+                {
+                    Array.Copy(inputPacket, _curMessage, _curMessage.Length);
+                    //Console.SetCursorPosition(0, 0);
+                    PacketOutput.WriteData(_curMessage, 16);
+                }
             }
         }
 
