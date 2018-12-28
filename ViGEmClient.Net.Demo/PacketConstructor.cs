@@ -236,7 +236,7 @@ namespace ViGEmClient.Net.Demo
             foreach (var property in properties)
             {
                 var propBytesArray = GetBytes(property.Property.GetValue(packetObj), property.PacketInfo.IsLittleEndian);
-                if (property.Property.GetType().IsEnum)
+                if (property.Property.PropertyType.IsEnum)
                 {
                     var offset = property.PacketInfo.StartIndex;
                     for (var i = 0; i < propBytesArray.Length; i++)

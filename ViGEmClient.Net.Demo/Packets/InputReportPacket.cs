@@ -60,7 +60,8 @@ namespace ViGEmClient.Net.Demo
         RStick = 1 << 2,
         LStick = 1 << 3,
         Home = 1 << 4,
-        Capture = 1 << 5
+        Capture = 1 << 5,
+        ChargingGrip = 1 << 7
     }
 
     [Flags]

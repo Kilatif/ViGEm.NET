@@ -61,7 +61,7 @@ namespace ViGEmClient.Net.Demo
                 ConnectionType = ConnectionType.Usb,
                 ControllerType = ControllerType.Pro,
                 LeftButtons = leftReportObj.LeftButtons,
-                ShareButtons = leftReportObj.ShareButtons | rightReportObj.ShareButtons,
+                ShareButtons = leftReportObj.ShareButtons | rightReportObj.ShareButtons | SharedButtons.ChargingGrip,
                 RightButtons = rightReportObj.RightButtons,
                 LeftStick = leftReportObj.LeftStick,
                 RightStick = rightReportObj.RightStick,
@@ -88,12 +88,13 @@ namespace ViGEmClient.Net.Demo
                 ConnectionType = ConnectionType.Usb,
                 ControllerType = ControllerType.Pro,
                 LeftButtons = leftReportObj.LeftButtons,
-                ShareButtons = leftReportObj.ShareButtons & rightReportObj.ShareButtons,
+                ShareButtons = leftReportObj.ShareButtons | rightReportObj.ShareButtons | SharedButtons.ChargingGrip,
+                RightButtons = rightReportObj.RightButtons,
                 LeftStick = leftReportObj.LeftStick,
                 RightStick = rightReportObj.RightStick,
                 Vibration = 0x00,
                 ACK = mainReportObj.ACK,
-                SubCmdData = mainReportObj.SubCmdData,
+                SubCmdId = mainReportObj.SubCmdId,
             };
 
             if (mainReportObj.SubCmdId == 0x10)
