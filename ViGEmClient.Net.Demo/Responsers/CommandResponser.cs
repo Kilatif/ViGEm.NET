@@ -27,7 +27,7 @@ namespace ViGEmClient.Net.Demo.Responsers
                 SubCommandId = subCommandId
             };
 
-            InputReportPacket response;
+            CmdInputReportPacket response;
             switch (subCommandId)
             {
                 case 0x01:
@@ -38,13 +38,13 @@ namespace ViGEmClient.Net.Demo.Responsers
                 case 0x04:
                     IsTimerEnabled = true;
 
-                    response = PacketConstructor.BuildObject<InputReportPacket>(Reports.Default_0x21);
+                    response = PacketConstructor.BuildObject<CmdInputReportPacket>(Reports.Default_0x21);
                     response.ReportId = 0x30;
                     return PacketConstructor.BuildPacket(response);
 
                 case 0x05:
                     IsTimerEnabled = false;
-                    response = PacketConstructor.BuildObject<InputReportPacket>(Reports.Default_0x21);
+                    response = PacketConstructor.BuildObject<CmdInputReportPacket>(Reports.Default_0x21);
                     response.ReportId = 0x30;
                     
                     return PacketConstructor.BuildPacket(response);
@@ -55,7 +55,7 @@ namespace ViGEmClient.Net.Demo.Responsers
 
         private byte[] BuildReportPacket(byte[] packet)
         {
-            var responsePacket = PacketConstructor.BuildObject<InputReportPacket>(Reports.Default_0x21);
+            var responsePacket = PacketConstructor.BuildObject<CmdInputReportPacket>(Reports.Default_0x21);
             var requestPacket = PacketConstructor.BuildObject<OutputReportPacket>(packet);
 
             responsePacket.SubCmdId = requestPacket.SubCommandId;

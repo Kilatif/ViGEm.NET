@@ -66,21 +66,30 @@ namespace ViGEmClient.Net.Demo
                 LeftStick = leftReportObj.LeftStick,
                 RightStick = rightReportObj.RightStick,
                 Vibration = 0x00,
-                ACK = mainReportObj.ACK,
-                SubCmdId = 0x00,
-                SubCmdData = new byte[1]
             };
 
+            var customData = new byte[mainReportObj.CustomData.Length];
+            Array.Copy(mainReportObj.CustomData, customData, customData.Length);
+            if (mainJoyCon == JoyConType.Right)
+            {
+                for (var i = 0; i < customData.Length; i++)
+                {
+                    customData[i] ^= 0xFF;
+                }
+            }
+
+            inputReportObj.CustomData = customData;
+            
             return PacketConstructor.BuildPacket(inputReportObj);
         }
 
         public static byte[] BuildUnionReport_0x21(byte[] leftReport, byte[] rightReport, JoyConType mainJoyCon)
         {
-            var leftReportObj = PacketConstructor.BuildObject<InputReportPacket>(leftReport);
-            var rightReportObj = PacketConstructor.BuildObject<InputReportPacket>(rightReport);
+            var leftReportObj = PacketConstructor.BuildObject<CmdInputReportPacket>(leftReport);
+            var rightReportObj = PacketConstructor.BuildObject<CmdInputReportPacket>(rightReport);
             var mainReportObj = (mainJoyCon == JoyConType.Left) ? leftReportObj : rightReportObj;
 
-            var inputReportObj = new InputReportPacket
+            var inputReportObj = new CmdInputReportPacket()
             {
                 ReportId = 0x21,
                 Timer = mainReportObj.Timer,

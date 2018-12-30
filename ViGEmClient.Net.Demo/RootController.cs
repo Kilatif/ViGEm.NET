@@ -5,85 +5,57 @@ using ViGEmClient.Net.Demo.Responsers;
 
 namespace ViGEmClient.Net.Demo
 {
-    enum TimerStatus : byte
-    {
-        Disable = 0,
-        EnableAndSavePacket = 1,
-        Ignore = 2
-    }
-
     class RootController : IDisposable
     {
         private const string MacRegistryPath = "SYSTEM\\ControlSet001\\Services\\ViGEmBus\\Parameters\\Targets\\NintendoSwitchPro\\";
         private const string MacValueName = "TargetMacAddress";
 
+        private JoyConsProDevice _joyConsProDevice;
         private NintendoSwitchController _deviceTarget;
         private CommandResponser _responser;
 
         public void Run()
         {
-            var joyConsProDev = new JoyConsProDevice {MainJoyCon = JoyConType.Right};
-
-            joyConsProDev.AddSyncResponseContidion(report => report[0] == 0x21);
-            joyConsProDev.InputRecieved += JoyConsProDev_InputRecieved;
-
-            var error = joyConsProDev.Initialize();
-
-            Console.ReadKey();
-
-            var flashRead = PacketConstructor.BuildPacket(new SubCmdDataFlashRead
+            _joyConsProDevice = new JoyConsProDevice
             {
-                Address = 0x3D600000,
-                Length = 18
-            });
+                MainJoyCon = JoyConType.Right
+            };
 
-            var requestPacket = PacketConstructor.BuildPacket(new OutputReportPacket
+            _joyConsProDevice.AddSyncResponseContidion(report => report[0] == 0x21);
+            _joyConsProDevice.AddSyncResponseContidion(report => report[0] == 0x30);
+            _joyConsProDevice.InputRecieved += JoyConsProDev_InputRecieved;
+
+            var error = _joyConsProDevice.Initialize();
+            if (error != ErrorCode.NoError)
             {
-                CommandId = 0x01,
-                SubCommandId = 0x10,
-                SubCommandData = flashRead
-            });
-
-            joyConsProDev.SendOutputReport(requestPacket);
-
-            Console.ReadKey();
-
-            joyConsProDev.Dispose();
-        }
-
-        private byte[] _curMessage = new byte[64];
-        private void JoyConsProDev_InputRecieved(byte[] inputPacket)
-        {
-            if (inputPacket[0] == 0x21)
-            {
-                lock (_curMessage)
-                {
-                    Array.Copy(inputPacket, _curMessage, _curMessage.Length);
-                    //Console.SetCursorPosition(0, 0);
-                    PacketOutput.WriteData(_curMessage, 16);
-                }
+                Console.WriteLine("Error!!");
+                Console.ReadLine();
+                return;
             }
-        }
 
-        /*public void Run()
-        {
             var macAddress = InitializeAndConnectDevice();
-            var control = PacketConstructor.BuildObject<ReportPacket>(Reports.Default_0x21);
+            
 
             _responser = new CommandResponser {DeviceMac = macAddress};
             _deviceTarget.FeedbackReceived += DeviceFeedbackReciver;
 
             Console.ReadLine();
+        }
 
-            control.ReportId = 0x30;
-            _deviceTarget.SendReport(PacketConstructor.BuildPacket(control), (byte)TimerStatus.EnableAndSavePacket);
+        private void JoyConsProDev_InputRecieved(byte[] inputPacket)
+        {
+            if (inputPacket != null)
+            {
+                _deviceTarget.SendReport(inputPacket);
 
-            Console.ReadLine();
-
-            control.LeftButtons = LeftButtons.Right;
-            _deviceTarget.SendReport(PacketConstructor.BuildPacket(control));
-
-            Console.ReadLine();
+                if (inputPacket[0] == 0x21)
+                {
+                    Console.WriteLine("Send response...");
+                    PacketOutput.WriteData(inputPacket, 16);
+                    Console.WriteLine("-------------------");
+                    Console.WriteLine();
+                }
+            }
         }
 
         private void DeviceFeedbackReciver(object sender, byte[] packet)
@@ -92,24 +64,25 @@ namespace ViGEmClient.Net.Demo
             PacketOutput.WriteData(packet, 16);
             Console.WriteLine();
 
-            var prevTimerEnable = _responser.IsTimerEnabled;
-            var response = _responser.BuildResponsePacket(packet);
-            var curTimerEnable = _responser.IsTimerEnabled;
-
-            byte timerStatus = (byte)TimerStatus.Ignore;
-            if (!prevTimerEnable && curTimerEnable)
+            if (packet[0] == 0x80)
             {
-                timerStatus = (byte)TimerStatus.EnableAndSavePacket;
+                var response = _responser.BuildResponsePacket(packet);
+
+                if (response != null)
+                {
+                    _deviceTarget.SendReport(response);
+
+                    Console.WriteLine("Send response...");
+                    PacketOutput.WriteData(response, 16);
+                    Console.WriteLine("-------------------");
+                    Console.WriteLine();
+                }
             }
-
-            if (response != null)
+            else
             {
-                _deviceTarget.SendReport(response, timerStatus);
-
-                Console.WriteLine("Send response...");
-                PacketOutput.WriteData(response, 16);
-                Console.WriteLine("-------------------");
-                Console.WriteLine();
+                var joyConPacket = new byte[49];
+                Array.Copy(packet, joyConPacket, joyConPacket.Length);
+                _joyConsProDevice.SendOutputReport(joyConPacket);
             }
         }
 
@@ -131,7 +104,7 @@ namespace ViGEmClient.Net.Demo
             }
 
             return mac;
-        }*/
+        }
 
         public void Dispose()
         {
