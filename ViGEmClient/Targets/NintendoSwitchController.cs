@@ -45,12 +45,7 @@ namespace Nefarius.ViGEm.Client.Targets
         /// <param name="timerStatus">timer status for report (0 - disable, 1 - enable and save report, 2 - ignore)</param>
         public void SendReport(byte[] report, byte timerStatus = 2)
         {
-            var submit = new ViGEmClient.NSWITCH_REPORT
-            {
-                TimerStatus = timerStatus,
-                Report = report
-            };
-            var error = ViGEmClient.vigem_target_nswitch_update(Client.NativeHandle, NativeHandle, submit);
+            var error = ViGEmClient.vigem_target_nswitch_update(Client.NativeHandle, NativeHandle, report, timerStatus);
 
             switch (error)
             {
@@ -70,9 +65,7 @@ namespace Nefarius.ViGEm.Client.Targets
             // 
             _notificationCallback = (client, target, report) =>
             {
-                var array = new byte[64];
-                Marshal.Copy(report, array, 0, 64);
-                FeedbackReceived?.Invoke(this, array);
+                FeedbackReceived?.Invoke(this, report);
             };
 
             var error = ViGEmClient.vigem_target_nswitch_register_notification(Client.NativeHandle, NativeHandle,

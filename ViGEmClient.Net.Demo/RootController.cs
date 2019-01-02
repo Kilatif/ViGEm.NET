@@ -14,7 +14,7 @@ namespace ViGEmClient.Net.Demo
         private NintendoSwitchController _deviceTarget;
         private CommandResponser _responser;
 
-        public void Run()
+        /*public void Run()
         {
             _joyConsProDevice = new JoyConsProDevice
             {
@@ -40,6 +40,34 @@ namespace ViGEmClient.Net.Demo
             _deviceTarget.FeedbackReceived += DeviceFeedbackReciver;
 
             Console.ReadLine();
+        }*/
+
+        public void Run()
+        {
+            var device = new Nefarius.ViGEm.Client.ViGEmClient();
+
+            var deviceTarget = new NintendoSwitchController(device);
+
+            deviceTarget.Connect();
+            deviceTarget.FeedbackReceived += (sender, outputReport) =>
+            {
+                outputReport[0] = 0x30;
+                deviceTarget.SendReport(outputReport);
+            };
+
+            Console.ReadLine();
+
+            var packet = Reports.Default_0x21;
+            deviceTarget.SendReport(packet);
+
+            Console.ReadLine();
+
+            packet[1] = 0xAA;
+            deviceTarget.SendReport(packet);
+
+            Console.ReadLine();
+
+            deviceTarget.Disconnect();
         }
 
         private void JoyConsProDev_InputRecieved(byte[] inputPacket)

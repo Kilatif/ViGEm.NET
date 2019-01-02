@@ -42,14 +42,6 @@ namespace Nefarius.ViGEm.Client
             public short sThumbRY;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct NSWITCH_REPORT
-        {
-            public byte TimerStatus;
-            [MarshalAsAttribute(UnmanagedType.ByValArray, SizeConst = 64)]
-            public byte[] Report;
-        }
-
         internal enum VIGEM_TARGET_TYPE : UInt32
         {
             // 
@@ -76,7 +68,7 @@ namespace Nefarius.ViGEm.Client
         internal delegate void PVIGEM_NSWITCH_NOTIFICATION(
             PVIGEM_CLIENT Client,
             PVIGEM_TARGET Target,
-            IntPtr Report);
+            byte[] Report);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         static extern PVIGEM_CLIENT vigem_alloc();
@@ -136,7 +128,7 @@ namespace Nefarius.ViGEm.Client
         internal static extern VIGEM_ERROR vigem_target_x360_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, XUSB_REPORT report);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern VIGEM_ERROR vigem_target_nswitch_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, NSWITCH_REPORT report);
+        internal static extern VIGEM_ERROR vigem_target_nswitch_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, byte[] report, byte timerStatus);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
         internal static extern VIGEM_ERROR vigem_target_nswitch_update(PVIGEM_CLIENT vigem, PVIGEM_TARGET target, byte[] report);
