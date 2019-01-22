@@ -68,6 +68,7 @@ namespace Nefarius.ViGEm.Client
         internal delegate void PVIGEM_NSWITCH_NOTIFICATION(
             PVIGEM_CLIENT Client,
             PVIGEM_TARGET Target,
+            [MarshalAs(UnmanagedType.LPArray,  ArraySubType = UnmanagedType.I1, SizeConst = 64)]
             byte[] Report);
 
         [DllImport("vigemclient.dll", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
